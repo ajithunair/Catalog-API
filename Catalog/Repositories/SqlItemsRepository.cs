@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Catalog.Entities;
 
 namespace Catalog.Repositories
@@ -13,29 +14,32 @@ namespace Catalog.Repositories
         {
             _context = context;
         }
-        public void CreateItem(Item item)
+        public async Task CreateItemAsync(Item item)
         {
             _context.Items.Add(item);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void DeleteItem(Guid id)
+        public async Task DeleteItemAsync(Guid id)
         {
             _context.Items.Remove(_context.Items.Where(i => i.Id == id).SingleOrDefault());
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public Item GetItem(Guid id)
+        public async Task<Item> GetItemAsync(Guid id)
         {
-            return _context.Items.Where(i => i.Id == id).SingleOrDefault();
+            var result = _context.Items.Where(i => i.Id == id).SingleOrDefault();
+            return await Task.FromResult(result);
         }
 
-        public IEnumerable<Item> GetItems()
+        public async Task<IEnumerable<Item>> GetItemsAsync()
         {
-            return _context.Items;
+            var result = _context.Items;
+            return await Task.FromResult(result);
+            
         }
 
-        public void UpdateItem(Item item)
+        public async Task UpdateItemAsync(Item item)
         {
             var existingItem = _context.Items.FirstOrDefault(i => i.Id == item.Id);
             if(existingItem != null)
@@ -43,7 +47,7 @@ namespace Catalog.Repositories
                     existingItem.Name = item.Name;
                     existingItem.Price = item.Price;
                 }
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 }
