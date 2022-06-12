@@ -31,6 +31,12 @@ namespace Catalog
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var server = Configuration["DbServer"] ?? "ms-sql-server";
+            var port = Configuration["DbPort"] ?? "1433";
+            var password = Configuration["Password"] ?? "Pa55w0rd!";
+            var database = Configuration["Database"] ?? "CatalogDB";
+            ConnectionString = $"server={server},{port};Initial Catalog={database};User ID=SA;Password={password}";
+
             services.AddControllers(options => options.SuppressAsyncSuffixInActionNames = false);
             services.AddDbContext<ItemContext>(options => options.UseSqlServer(ConnectionString));
             //services.AddSingleton<IItemsRepository, InMemItemsRepository>();
@@ -49,14 +55,13 @@ namespace Catalog
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Catalog v1"));
+                app.UseHttpsRedirection();
             }
-
-            app.UseHttpsRedirection();
-
+            
             app.UseRouting();
 
             app.UseAuthorization();
-
+            Services.DatabaseManagementService.MigrationInitialization(app);
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
